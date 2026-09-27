@@ -277,25 +277,6 @@
     });
   }
 
-  /* ---------------- Magnetic buttons ---------------- */
-
-  function initMagnetic() {
-    if (!finePointer || reduced() || !hasGsap()) return;
-    const { gsap } = window;
-    $$('[data-magnetic]').forEach((el) => {
-      const xTo = gsap.quickTo(el, 'x', { duration: 0.5, ease: 'power3.out' });
-      const yTo = gsap.quickTo(el, 'y', { duration: 0.5, ease: 'power3.out' });
-      el.addEventListener('pointermove', (e) => {
-        const r = el.getBoundingClientRect();
-        xTo((e.clientX - (r.left + r.width / 2)) * 0.28);
-        yTo((e.clientY - (r.top + r.height / 2)) * 0.4);
-      });
-      el.addEventListener('pointerleave', () => {
-        gsap.to(el, { x: 0, y: 0, duration: 0.9, ease: 'elastic.out(1, 0.45)' });
-      });
-    });
-  }
-
   /* ---------------- Services: "More" ---------------- */
 
   function refreshMoreButtons() {
@@ -830,7 +811,6 @@
   initFaq();
   initForm();
   initWhatsAppFloat();
-  initMagnetic();
 
   // Split words shift slightly when the web fonts arrive, so wait for them (briefly).
   const fontsReady = document.fonts ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 900))]) : Promise.resolve();

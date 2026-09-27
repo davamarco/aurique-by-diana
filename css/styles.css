@@ -132,9 +132,17 @@ ul { padding: 0; list-style: none; }
   letter-spacing: .01em;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color .35s var(--ease-out), color .35s var(--ease-out), border-color .35s var(--ease-out);
-  will-change: transform;
+  transition: transform .45s var(--ease-out), background-color .35s var(--ease-out), color .35s var(--ease-out), border-color .35s var(--ease-out);
 }
+/* Every button grows a touch on hover and settles back when pressed. */
+@media (hover: hover) {
+  .btn:hover,
+  .copy-btn:hover,
+  .filters button:hover { transform: scale(1.04); }
+  .wa-float.is-visible:hover { transform: scale(1.08); }
+}
+.btn:active,
+.filters button:active { transform: scale(.97); }
 .btn__icon { width: 1.15em; height: 1.15em; flex: none; }
 .btn--book { --btn-bg: var(--burgundy); --btn-fg: var(--ivory); }
 .btn--book:hover { --btn-bg: var(--burgundy-2); }
@@ -571,7 +579,7 @@ ul { padding: 0; list-style: none; }
   background: none;
   font-size: var(--fs-small);
   cursor: pointer;
-  transition: background-color .3s, color .3s, border-color .3s;
+  transition: transform .45s var(--ease-out), background-color .3s, color .3s, border-color .3s;
 }
 .filters button:hover { border-color: var(--espresso); }
 .filters button[aria-pressed="true"] {
@@ -1113,6 +1121,20 @@ ul { padding: 0; list-style: none; }
 .site-footer a { text-decoration: none; }
 .site-footer a:hover { color: #D7A3AB; }
 .footer__grid a { display: inline-block; padding-block: .2rem; }
+.social { display: flex; flex-direction: column; gap: .1rem; margin-top: -.6rem; }
+.social a {
+  display: inline-flex; align-items: center; gap: .75rem;
+  min-height: 44px;
+  padding-block: 0;
+  color: var(--on-dark-muted);
+  transition: color .3s;
+}
+.social a:hover { color: var(--on-dark); }
+.social svg {
+  width: 22px; height: 22px; flex: none;
+  transition: transform .45s var(--ease-spring);
+}
+.social a:hover svg { transform: scale(1.12); }
 .footer__base {
   display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between;
   gap: 1.5rem;
@@ -1208,3 +1230,6 @@ html:not(.js) .wa-float { transform: scale(1); }
 
 /* Hold the hero portrait until the intro can start, so the full arch never flashes first. */
 .js:not(.is-ready) .hero__portrait-inner { visibility: hidden; }
+
+/* Fraunces' italic ampersand is the old "Et" ligature and reads as a typo; keep it upright. */
+.section-title em.amp { font-style: normal; }
