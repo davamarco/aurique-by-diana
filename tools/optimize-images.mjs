@@ -1,0 +1,121 @@
+// Turns the original photos in photos-src/ into web-ready WebP files in assets/img/
+// and regenerates js/gallery-data.js. Run with: npm run images
+//
+// photos-src/
+//   logo.(jpg|png)                 → assets/img/logo-dark.png, logo-light.png (transparent)
+//   hero/, about/, services/, decor/ → assets/img/<folder>/<name>-<width>.webp
+//   gallery/<manicure|pedicure|extensions>/ → assets/img/gallery/<cat>/… + manifest
+
+import sharp from 'sharp';
+import { readdir, mkdir, writeFile, stat } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const SRC = path.join(ROOT, 'photos-src');
+const OUT = path.join(ROOT, 'assets', 'img');
+const IMG_RE = /\.(jpe?g|png|webp|heic|tiff?)$/i;
+
+const PHOTO_WIDTHS = [800, 1200, 1800];
+const GALLERY_WIDTHS = [600, 1200];
+const GALLERY_CATS = ['manicure', 'pedicure', 'extensions'];
+
+const slug = (name) =>
+  name.replace(/\.[^.]+$/, '').toLowerCase().normalize('NFKD')
+    .replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '') || 'photo';
+
+async function listImages(dir) {
+  if (!existsSync(dir)) return [];
+  return (await readdir(dir)).filter((f) => IMG_RE.test(f)).sort();
+}
+
+async function isFresh(src, out) {
+  if (!existsSync(out)) return false;
+  return (await stat(out)).mtimeMs >= (await stat(src)).mtimeMs;
+}
+
+async function toWebp(srcFile, outDir, base, widths, quality = 80) {
+  await mkdir(outDir, { recursive: true });
+  const meta = await sharp(srcFile).rotate().metadata();
+  // .rotate() applies EXIF orientation, so swap for portrait phone shots.
+  const turned = meta.orientation >= 5;
+  const w0 = turned ? meta.height : meta.width;
+  const h0 = turned ? meta.width : meta.height;
+  const sizes = [...new Set(widths.map((w) => Math.min(w, w0)))];
+  const files = [];
+  for (const w of sizes) {
+    const out = path.join(outDir, `${base}-${w}.webp`);
+    if (!(await isFresh(srcFile, out))) {
+      await sharp(srcFile).rotate().resize({ width: w, withoutEnlargement: true })
+        .webp({ quality, effort: 5 }).toFile(out);
+    }
+    files.push({ w, file: out });
+  }
+  return { width: w0, height: h0, files };
+}
+
+const rel = (p) => path.relative(ROOT, p).split(path.sep).join('/');
+
+async function logo() {
+  const src = (await listImages(SRC)).find((f) => /^logo\./i.test(f));
+  if (!src) return;
+  // Line art on white: luminance becomes the alpha channel, then fill with brand colors.
+  const input = path.join(SRC, src);
+  const trimmed = await sharp(input).trim({ threshold: 12 }).extend({ top: 24, bottom: 24, left: 24, right: 24, background: '#ffffff' }).toBuffer();
+  const { width, height } = await sharp(trimmed).metadata();
+  const alpha = await sharp(trimmed).greyscale().negate().linear(1.35, 0).raw().toBuffer();
+  for (const [name, rgb] of [['logo-dark', [36, 28, 26]], ['logo-light', [247, 241, 232]]]) {
+    await sharp({ create: { width, height, channels: 3, background: { r: rgb[0], g: rgb[1], b: rgb[2] } } })
+      .joinChannel(alpha, { raw: { width, height, channels: 1 } })
+      .resize({ width: Math.min(width, 900) })
+      .png({ compressionLevel: 9 })
+      .toFile(path.join(OUT, `${name}.png`));
+  }
+  // Header lockup: the "AURIQUE — BY DIANA —" lines cut from the same logo
+  // (the full round mark is unreadable at header height).
+  for (const name of ['logo-dark', 'logo-light']) {
+    const file = path.join(OUT, `${name}.png`);
+    const m = await sharp(file).metadata();
+    const box = {
+      left: Math.round(m.width * 0.17), top: Math.round(m.height * 0.766),
+      width: Math.round(m.width * 0.69), height: Math.round(m.height * 0.153)
+    };
+    const cut = await sharp(file).extract(box).png().toBuffer();
+    await sharp(cut).trim({ background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 10 })
+      .png({ compressionLevel: 9 })
+      .toFile(path.join(OUT, name.replace('logo', 'wordmark') + '.png'));
+  }
+  console.log(`logo      → assets/img/logo-dark.png, logo-light.png, wordmark-dark.png, wordmark-light.png`);
+}
+
+async function folder(name) {
+  for (const f of await listImages(path.join(SRC, name))) {
+    const r = await toWebp(path.join(SRC, name, f), path.join(OUT, name), slug(f), PHOTO_WIDTHS);
+    console.log(`${name.padEnd(9)} → ${r.files.map((x) => rel(x.file)).join(', ')}  (${r.width}×${r.height})`);
+  }
+}
+
+async function gallery() {
+  const items = [];
+  for (const cat of GALLERY_CATS) {
+    for (const f of await listImages(path.join(SRC, 'gallery', cat))) {
+      const r = await toWebp(path.join(SRC, 'gallery', cat, f), path.join(OUT, 'gallery', cat), slug(f), GALLERY_WIDTHS, 78);
+      items.push({
+        cat,
+        src: rel(r.files.at(-1).file),
+        srcset: r.files.map((x) => `${rel(x.file)} ${x.w}w`).join(', '),
+        w: r.width,
+        h: r.height
+      });
+    }
+  }
+  const body = `// Generated by tools/optimize-images.mjs — do not edit by hand.\nwindow.AURIQUE_GALLERY = ${JSON.stringify(items, null, 2)};\n`;
+  await writeFile(path.join(ROOT, 'js', 'gallery-data.js'), body);
+  console.log(`gallery   → ${items.length} photos in js/gallery-data.js`);
+}
+
+await mkdir(OUT, { recursive: true });
+await logo();
+for (const name of ['hero', 'about', 'services', 'decor']) await folder(name);
+await gallery();

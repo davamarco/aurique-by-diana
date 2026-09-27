@@ -1,0 +1,13 @@
+{
+  "name": "aurique-by-diana",
+  "private": true,
+  "description": "auriquebydiana.com — static site. No build step: npm is only used to optimize photos.",
+  "scripts": {
+    "images": "node tools/optimize-images.mjs",
+    "serve": "npx --yes http-server -p 8080 -c-1 ."
+  },
+  "devDependencies": {
+    "playwright-core": "^1.63.0",
+    "sharp": "^0.34.0"
+  }
+}
