@@ -4,7 +4,10 @@
 // photos-src/
 //   logo.(jpg|png)                 → assets/img/logo-dark.png, logo-light.png (transparent)
 //   hero/, about/, services/, decor/ → assets/img/<folder>/<name>-<width>.webp
-//   gallery/<manicure|pedicure|extensions>/ → assets/img/gallery/<cat>/… + manifest
+//   gallery/<manicure|pedicure|extensions>/<service>__<look>.jpg
+//                                  → assets/img/gallery/<cat>/… + manifest; the part before "__"
+//                                    links the photo to a service row (data-service) on the page.
+//   _ai-generated-not-used/        → ignored (generated images, not Diana's work)
 
 import sharp from 'sharp';
 import { readdir, mkdir, writeFile, stat } from 'node:fs/promises';
@@ -101,7 +104,10 @@ async function gallery() {
   for (const cat of GALLERY_CATS) {
     for (const f of await listImages(path.join(SRC, 'gallery', cat))) {
       const r = await toWebp(path.join(SRC, 'gallery', cat, f), path.join(OUT, 'gallery', cat), slug(f), GALLERY_WIDTHS, 78);
+      const base = slug(f);
       items.push({
+        id: base,
+        service: base.includes('__') ? base.split('__')[0] : null,
         cat,
         src: rel(r.files.at(-1).file),
         srcset: r.files.map((x) => `${rel(x.file)} ${x.w}w`).join(', '),

@@ -326,94 +326,137 @@
     refreshMoreButtons();
   }
 
-  /* ---------------- Gallery, cursor, lightbox ---------------- */
+  /* ---------------- Gallery, service photos, lightbox, cursor ---------------- */
 
   function initGallery() {
-    const data = window.AURIQUE_GALLERY || [];
-    const section = $('[data-gallery]');
-    const grid = $('[data-gallery-grid]');
-    if (!section || !grid) return;
-    if (!data.length) {
-      $$('[data-needs="gallery"]').forEach((a) => { a.hidden = true; });
-      return;
-    }
-    section.hidden = false;
+    const meta = window.AURIQUE_GALLERY_META || { order: [], covers: {}, alt: {} };
+    const rank = (id) => { const i = meta.order.indexOf(id); return i < 0 ? 999 : i; };
+    const data = (window.AURIQUE_GALLERY || []).slice().sort((a, b) => rank(a.id) - rank(b.id));
+    const altOf = (item) => {
+      const a = meta.alt[item.id];
+      return (a && (a[lang] || a.en)) || `${lookup(`services.g${item.cat[0].toUpperCase()}${item.cat.slice(1)}`)} — Aurique by Diana`;
+    };
 
-    const catLabel = (cat) => lookup(`services.g${cat[0].toUpperCase()}${cat.slice(1)}`) || cat;
-    const shots = data.map((item, i) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'shot';
-      btn.dataset.cat = item.cat;
-      btn.dataset.anim = '';
-      btn.style.setProperty('--d', `${(i % 6) * 80}ms`);
+    const makeImg = (item, sizes, eager = false) => {
       const img = document.createElement('img');
       img.src = item.src;
       img.srcset = item.srcset;
-      img.sizes = '(max-width: 640px) 78vw, (max-width: 1100px) 46vw, 31vw';
+      img.sizes = sizes;
       img.width = item.w;
       img.height = item.h;
-      img.loading = 'lazy';
+      img.loading = eager ? 'eager' : 'lazy';
       img.decoding = 'async';
-      btn.append(img);
-      grid.append(btn);
-      return btn;
-    });
+      return img;
+    };
 
-    const setAlts = () => shots.forEach((btn) => {
-      const label = `${catLabel(btn.dataset.cat)} — Aurique by Diana`;
-      $('img', btn).alt = label;
-      btn.setAttribute('aria-label', `${lookup('work.view')}: ${label}`);
-    });
-    setAlts();
-    document.addEventListener('aurique:lang', setAlts);
-    observeReveal(grid);
-
-    $$('[data-filter]').forEach((f) => {
-      f.addEventListener('click', () => {
-        $$('[data-filter]').forEach((b) => b.setAttribute('aria-pressed', String(b === f)));
-        shots.forEach((s) => {
-          s.hidden = !(f.dataset.filter === 'all' || s.dataset.cat === f.dataset.filter);
-          s.classList.add('is-in');
-        });
-        grid.scrollTo?.({ left: 0 });
-        window.ScrollTrigger?.refresh();
-      });
-    });
-
-    // Lightbox
+    // Lightbox: shows any list of gallery items.
     const dlg = $('[data-lightbox]');
     const lbImg = $('[data-lb-img]');
+    let lbList = [];
     let index = 0;
-    const visible = () => shots.filter((s) => !s.hidden);
     const show = (i) => {
-      const list = visible();
-      index = (i + list.length) % list.length;
-      const img = $('img', list[index]);
-      lbImg.src = img.currentSrc || img.src;
-      lbImg.srcset = img.srcset;
+      index = (i + lbList.length) % lbList.length;
+      const item = lbList[index];
+      lbImg.srcset = item.srcset;
       lbImg.sizes = '90vw';
-      lbImg.alt = img.alt;
+      lbImg.src = item.src;
+      lbImg.alt = altOf(item);
+      $$('[data-lb-prev], [data-lb-next]').forEach((b) => { b.hidden = lbList.length < 2; });
     };
-    shots.forEach((s) => s.addEventListener('click', () => {
-      show(visible().indexOf(s));
+    const openLightbox = (list, start) => {
+      if (!dlg || !list.length) return;
+      lbList = list;
+      show(start);
       dlg.showModal();
       lenis?.stop();
       cursorOff();
-    }));
-    dlg.addEventListener('close', () => lenis?.start());
-    $('[data-lb-close]').addEventListener('click', () => dlg.close());
-    $('[data-lb-prev]').addEventListener('click', () => show(index - 1));
-    $('[data-lb-next]').addEventListener('click', () => show(index + 1));
-    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
-    dlg.addEventListener('keydown', (e) => {
+    };
+    dlg?.addEventListener('close', () => lenis?.start());
+    $('[data-lb-close]')?.addEventListener('click', () => dlg.close());
+    $('[data-lb-prev]')?.addEventListener('click', () => show(index - 1));
+    $('[data-lb-next]')?.addEventListener('click', () => show(index + 1));
+    dlg?.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+    dlg?.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') show(index - 1);
       if (e.key === 'ArrowRight') show(index + 1);
     });
 
-    // "View" cursor
+    // Service rows: a small arched photo that opens that service's photos.
+    const thumbs = [];
+    $$('.svc[data-service]').forEach((row) => {
+      const list = data.filter((d) => d.service === row.dataset.service);
+      if (!list.length) return;
+      const coverId = meta.covers[row.dataset.service];
+      const start = Math.max(0, list.findIndex((d) => d.id === coverId));
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'svc__thumb';
+      btn.append(makeImg(list[start], '96px'));
+      btn.addEventListener('click', () => openLightbox(list, start));
+      row.prepend(btn);
+      row.classList.add('has-thumb');
+      thumbs.push({ btn, row, item: list[start] });
+    });
+
+    // Gallery grid
+    const section = $('[data-gallery]');
+    const grid = $('[data-gallery-grid]');
+    const shots = [];
+    if (section && grid && data.length) {
+      section.hidden = false;
+      data.forEach((item, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = i === 0 ? 'shot shot--feature' : 'shot';
+        btn.dataset.cat = item.cat;
+        btn.dataset.anim = '';
+        btn.style.setProperty('--d', `${(i % 4) * 80}ms`);
+        btn.append(makeImg(item, i === 0
+          ? '(max-width: 640px) 78vw, (max-width: 1100px) 66vw, 50vw'
+          : '(max-width: 640px) 78vw, (max-width: 1100px) 33vw, 25vw'));
+        btn.addEventListener('click', () => {
+          const visible = shots.filter((s) => !s.btn.hidden);
+          openLightbox(visible.map((s) => s.item), visible.findIndex((s) => s.btn === btn));
+        });
+        grid.append(btn);
+        shots.push({ btn, item });
+      });
+      observeReveal(grid);
+
+      $$('[data-filter]').forEach((f) => {
+        f.addEventListener('click', () => {
+          $$('[data-filter]').forEach((b) => b.setAttribute('aria-pressed', String(b === f)));
+          shots.forEach(({ btn }) => {
+            btn.hidden = !(f.dataset.filter === 'all' || btn.dataset.cat === f.dataset.filter);
+            btn.classList.add('is-in');
+          });
+          // The large first tile only makes sense in the full, unfiltered grid.
+          shots[0].btn.classList.toggle('shot--feature', f.dataset.filter === 'all');
+          grid.scrollTo?.({ left: 0 });
+          window.ScrollTrigger?.refresh();
+        });
+      });
+    } else {
+      $$('[data-needs="gallery"]').forEach((a) => { a.hidden = true; });
+    }
+
+    const setAlts = () => {
+      shots.forEach(({ btn, item }) => {
+        const alt = altOf(item);
+        $('img', btn).alt = alt;
+        btn.setAttribute('aria-label', `${lookup('work.view')}: ${alt}`);
+      });
+      thumbs.forEach(({ btn, row, item }) => {
+        $('img', btn).alt = altOf(item);
+        btn.setAttribute('aria-label', `${lookup('work.view')}: ${$('.svc__name', row).textContent}`);
+      });
+    };
+    setAlts();
+    document.addEventListener('aurique:lang', setAlts);
+
+    // "View" cursor over photos
     const cursor = $('[data-cursor]');
-    function cursorOff() { cursor.classList.remove('is-on'); }
+    function cursorOff() { cursor?.classList.remove('is-on'); }
     if (!finePointer || !cursor) return;
     let xTo = (x) => { cursor.style.left = `${x}px`; };
     let yTo = (y) => { cursor.style.top = `${y}px`; };
@@ -424,7 +467,7 @@
     window.addEventListener('pointermove', (e) => {
       xTo(e.clientX);
       yTo(e.clientY);
-      cursor.classList.toggle('is-on', !!e.target.closest?.('.shot') && !dlg.open);
+      cursor.classList.toggle('is-on', !!e.target.closest?.('.shot, .svc__thumb') && !dlg?.open);
     }, { passive: true });
     document.addEventListener('pointerleave', cursorOff);
   }

@@ -13,13 +13,18 @@
 
 ## Фото
 
-1. Оригиналы кладём в `photos-src/` (эта папка не попадает в git):
-   - `photos-src/hero/`, `photos-src/about/`, `photos-src/services/`
-   - `photos-src/gallery/manicure/`, `…/pedicure/`, `…/extensions/`
-   - `photos-src/logo.jpg`
-2. Запускаем `npm install` (один раз), затем `npm run images`.
-3. Скрипт создаёт WebP нескольких размеров в `assets/img/` и обновляет `js/gallery-data.js`.
-   Галерея и пункт меню «Work» появляются сами, как только в ней есть хотя бы одно фото.
+Оригиналы лежат в `photos-src/` (в git не попадают):
+
+- `photos-src/hero/`, `photos-src/about/`, `photos-src/decor/`, `photos-src/logo.jpg`
+- `photos-src/gallery/<manicure|pedicure|extensions>/<услуга>__<описание>.jpg`.
+  Часть имени до `__` привязывает фото к строке прайса с тем же `data-service`:
+  `builder-gel`, `builder-gel-long`, `extensions`, `gel-pedicure`.
+  Например: `photos-src/gallery/manicure/builder-gel__nude-glazed.jpg`.
+- `photos-src/_ai-generated-not-used/`: сгенерированные картинки, на сайте не используются.
+
+После добавления фото запусти `npm run images`: скрипт создаёт WebP в `assets/img/` и обновляет `js/gallery-data.js`.
+Порядок показа, фото-обложку каждой услуги и подписи (EN/ES) задаёт `js/gallery-meta.js`.
+Новому фото без подписи достаётся общая подпись по категории, а в сетке оно встаёт в конец.
 
 ## Локальный просмотр
 
