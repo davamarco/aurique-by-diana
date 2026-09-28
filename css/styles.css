@@ -1360,6 +1360,44 @@ body::before {
     #F2E9DC 26px 52px);
 }
 
+/* Instagram and Visit sit on a plain ivory ground (the LOVE hands dissolve into it,
+   the map and hours card read cleanly). The ground reaches past the section into the
+   neighbours' empty padding, so the stripes melt away there instead of cutting an edge. */
+.insta,
+.visit { position: relative; isolation: isolate; }
+.insta::before,
+.visit::before {
+  --fade: clamp(5rem, 10vw, 10rem);
+  content: '';
+  position: absolute; z-index: -1;
+  inset: calc(-1 * var(--fade)) calc(50% - 50vw);
+  background: linear-gradient(to bottom,
+    rgba(247, 241, 232, 0) 0,
+    var(--ivory) var(--fade),
+    var(--ivory) calc(100% - var(--fade)),
+    rgba(247, 241, 232, 0) 100%);
+  pointer-events: none;
+}
+
+/* Decor may reach past the edges; clip it here (on body, "clip" is promoted to the
+   viewport as "hidden", which still lets touch/programmatic scrolling slide sideways). */
+main { overflow-x: clip; }
+
+
+/* ---------- Background: tone-on-tone stripes ----------
+   Two close ivory tones, like luxury lingerie packaging. The stripes sit on a fixed
+   layer behind everything, so sections slide over them; cards, photos and dark
+   sections keep their own solid surfaces. */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-linear-gradient(90deg,
+    var(--ivory) 0 26px,
+    #F2E9DC 26px 52px);
+}
+
 /* Instagram keeps a plain ivory ground, so the LOVE hands dissolve into the page;
    it fades in and out of the stripes instead of cutting a hard edge. */
 .insta { position: relative; isolation: isolate; }
