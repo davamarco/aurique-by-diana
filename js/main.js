@@ -167,9 +167,25 @@
     tl.call(() => title.classList.add('is-in'), null, 0.25);
     tl.call(() => rest.forEach((el) => el.classList.add('is-in')), null, 0.3);
 
+    const detail = $('[data-detail]', hero);
+    if (detail) {
+      // Surfaces out of a haze: blurred, faint and slightly larger, settling sharp into place.
+      tl.fromTo(detail,
+        { opacity: 0, filter: 'blur(18px)', scale: 1.08, y: 24 },
+        { opacity: 1, filter: 'blur(0px)', scale: 1, y: 0, duration: 1.8, ease: 'power2.out', clearProps: 'filter' },
+        1.1);
+      if (window.ScrollTrigger) {
+        gsap.to(detail, {
+          yPercent: -22,
+          ease: 'none',
+          scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true }
+        });
+      }
+    }
+
     if (window.ScrollTrigger && img) {
-      gsap.to(img, {
-        yPercent: 7,
+      gsap.to(arch, {
+        yPercent: 6,
         ease: 'none',
         scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true }
       });
@@ -784,6 +800,8 @@
   }
 
   /* ---------------- Boot ---------------- */
+
+
 
   // Placeholder answers ([TBD]) are for review only — never shown on the live domain.
   if (/(^|.)auriquebydiana.com$/.test(location.hostname)) {
