@@ -471,22 +471,76 @@
 
   /* ---------------- Reviews ---------------- */
 
+  // Warm palette tones for initials, cycled like Google's coloured avatars.
+  const AVATAR_TONES = ['#681D2A', '#8A5A44', '#5E4A42', '#9C5F63', '#4A3B36'];
+
   function renderReviews() {
     const list = $('[data-reviews]');
     const data = window.AURIQUE_REVIEWS || [];
-    if (!list || !data.length) return;
+    if (!list) return;
+    if (!data.length) { list.hidden = true; return; }
+
+    const gIcon = $('[data-g-icon]')?.innerHTML || '';
+    const stars = ($('.reviews__head .stars svg')?.outerHTML || '').replace(' id="st"', '');
+    const reviewsUrl = $('.reviews__head .score')?.href || '#';
+    const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+
     list.hidden = false;
     list.innerHTML = '';
     data.forEach((r, i) => {
-      const fig = document.createElement('figure');
-      fig.className = 'review is-in';
-      const q = document.createElement('blockquote');
-      q.textContent = (r.text && (r.text[lang] || r.text.en)) || '';
-      const cap = document.createElement('figcaption');
-      cap.textContent = r.name;
-      fig.append(q, cap);
-      list.append(fig);
+      const card = document.createElement('article');
+      card.className = 'review';
+      card.dataset.anim = '';
+      card.style.setProperty('--d', `${Math.min(i, 6) * 90}ms`);
+
+      const head = document.createElement('div');
+      head.className = 'review__head';
+      const avatar = document.createElement('span');
+      avatar.className = 'review__avatar';
+      avatar.setAttribute('aria-hidden', 'true');
+      avatar.style.setProperty('--avatar', AVATAR_TONES[i % AVATAR_TONES.length]);
+      avatar.textContent = initials(r.name || '');
+      const who = document.createElement('div');
+      who.className = 'review__who';
+      const name = document.createElement('p');
+      name.className = 'review__name';
+      name.textContent = r.name;
+      const st = document.createElement('span');
+      st.className = 'review__stars';
+      st.setAttribute('role', 'img');
+      st.setAttribute('aria-label', lookup('reviews.starsLabel'));
+      st.innerHTML = stars;
+      who.append(name, st);
+      head.append(avatar, who);
+      head.insertAdjacentHTML('beforeend', gIcon);
+
+      // Full text stays in the DOM (screen readers, search); CSS trims it to five lines.
+      const text = document.createElement('blockquote');
+      text.className = 'review__text';
+      text.textContent = `“${(r.text && (r.text[lang] || r.text.en)) || ''}”`;
+
+      const more = document.createElement('a');
+      more.className = 'review__more';
+      more.href = r.url || reviewsUrl;
+      more.target = '_blank';
+      more.rel = 'noopener';
+      more.textContent = t('readReview');
+      more.setAttribute('aria-label', `${t('readReview')}: ${r.name}`);
+
+      card.append(head, text, more);
+      list.append(card);
     });
+    observeReveal(list);
+    // In the swipe row the later cards start off-screen to the side; reveal the whole
+    // row together so nothing is still fading in when it's swiped into view.
+    if ('IntersectionObserver' in window) {
+      const rowObs = new IntersectionObserver(([entry]) => {
+        if (!entry.isIntersecting) return;
+        $$('.review', list).forEach((card) => card.classList.add('is-in'));
+        rowObs.disconnect();
+      }, { threshold: 0.2 });
+      rowObs.observe(list);
+    }
   }
 
   /* ---------------- Instagram (Behold) ---------------- */

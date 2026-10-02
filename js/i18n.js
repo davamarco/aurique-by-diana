@@ -67,10 +67,9 @@ window.AURIQUE_I18N = {
     'work.prev': 'Foto anterior',
     'work.next': 'Foto siguiente',
 
-    'reviews.title': 'Calificación <em>5.0</em> en Google',
+    'reviews.title': 'Lo que dicen las <em>clientas</em>',
     'reviews.starsLabel': '5 de 5 estrellas',
-    'reviews.count': 'Según 20 reseñas de clientas',
-    'reviews.read': 'Leer las reseñas en Google',
+    'reviews.count': 'Más de 20 reseñas en Google',
 
     'insta.title': 'Los últimos diseños, en <em>Instagram</em>',
     'insta.handsAlt': 'Cuatro manos con uñas almendradas que forman la palabra love',
@@ -128,6 +127,7 @@ window.AURIQUE_I18N = {
   dynamic: {
     en: {
       less: 'Less',
+      readReview: 'Read full review',
       today: 'Today',
       copied: 'Address copied',
       sending: 'Sending…',
@@ -140,6 +140,7 @@ window.AURIQUE_I18N = {
     },
     es: {
       less: 'Ver menos',
+      readReview: 'Leer reseña completa',
       today: 'Hoy',
       copied: 'Dirección copiada',
       sending: 'Enviando…',

@@ -35,6 +35,7 @@
 
   --ease-out: cubic-bezier(.16, .84, .24, 1);
   --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-soft: cubic-bezier(.22, .61, .36, 1);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -364,7 +365,7 @@ ul { padding: 0; list-style: none; }
 .mobile-menu__foot { display: flex; flex-direction: column; align-items: flex-start; gap: 1.5rem; }
 .mobile-menu__meta { color: var(--muted); }
 
-@media (max-width: 1180px) {
+@media (max-width: 1279px) {
   .site-nav { display: none; }
   .site-header__inner { grid-template-columns: 1fr auto; }
   .menu-toggle { display: inline-flex; align-items: center; }
@@ -777,45 +778,162 @@ ul { padding: 0; list-style: none; }
 /* ---------- Reviews ---------- */
 
 .reviews {
+  --rating: #E8B64C;   /* warm gold, star ratings only */
+  --card-gap: 1rem;
   width: auto;
   max-width: none;
   padding-inline: var(--gutter);
 }
-.reviews__score {
-  display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
-  max-width: var(--max);
+/* Same 26px stripes as the rest of the page, in espresso tones, so the lines carry
+   straight through from the section above. */
+.reviews.section--dark {
+  background: repeating-linear-gradient(90deg,
+    var(--espresso) 0 26px,
+    #2B2220 26px 52px);
+}
+.reviews__inner {
+  width: min(100%, 100rem);
   margin-inline: auto;
-  text-align: center;
 }
-.reviews__score .section-title { max-width: 12ch; }
-.reviews__meta {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .5rem 1rem;
-  color: var(--on-dark-muted);
-}
-.stars { display: inline-flex; color: #D7A3AB; }
-.stars svg { width: 110px; height: 22px; }
 
-.reviews__list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
-  gap: 1.25rem;
-  max-width: var(--max);
-  margin: clamp(3.5rem, 6vw, 5rem) auto 0;
+/* Head: an editorial split — the title on the left, the rating as a typographic figure on the right. */
+.reviews__head {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 2rem 3rem;
 }
-.review {
-  display: flex; flex-direction: column; justify-content: space-between; gap: 2rem;
-  padding: clamp(1.5rem, 2.5vw, 2.25rem);
-  border: 1px solid var(--line-dark);
-  border-radius: 20px;
+.reviews__head .section-title { max-width: 9ch; }
+.score {
+  display: inline-flex; align-items: center; gap: 1rem;
+  color: var(--on-dark);
+  text-decoration: none;
 }
-.review blockquote {
-  margin: 0;
+.score__num {
   font-family: var(--serif);
   font-weight: var(--serif-weight);
-  font-size: 1.3125rem;
-  line-height: 1.45;
+  font-size: clamp(3.5rem, 5vw + 1rem, 5.25rem);
+  line-height: .85;
+  letter-spacing: -.03em;
 }
-.review figcaption { color: var(--on-dark-muted); font-size: var(--fs-small); }
+.score__meta { display: flex; flex-direction: column; gap: .5rem; }
+.stars { display: inline-flex; color: var(--rating, #E8B64C); }
+.stars svg { width: 100px; height: 20px; }
+.score__link {
+  display: inline-flex; align-items: center; gap: .45rem;
+  color: var(--on-dark-muted);
+  font-size: .9375rem;
+  border-bottom: 1px solid rgba(247, 241, 232, .25);
+  padding-bottom: .2rem;
+  transition: color .3s, border-color .3s;
+}
+.score__arrow { width: 11px; height: 11px; transition: transform .4s var(--ease-out); }
+.score:hover .score__link { color: var(--on-dark); border-color: currentColor; }
+.score:hover .score__arrow { transform: translate(2px, -2px); }
+.g-icon { width: 18px; height: 18px; flex: none; }
+
+/* Cards: all five in one row on wide screens. */
+.reviews__list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--card-gap);
+  margin-top: clamp(3rem, 5vw, 4.5rem);
+}
+.review {
+  display: flex; flex-direction: column; gap: 1.1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--line-dark);
+  border-radius: 20px;
+  background: var(--espresso-2);
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, .6);
+  transition: scale .7s var(--ease-soft), border-color .6s ease, box-shadow .7s var(--ease-soft);
+}
+/* The scroll reveal owns "transform"; hover uses the separate "scale" property.
+   Extra specificity so the generic reveal transition further down can't drop "scale". */
+.js .reviews .review[data-anim] {
+  transition:
+    opacity .9s var(--ease-out) var(--d, 0s),
+    transform 1.1s var(--ease-out) var(--d, 0s),
+    scale .7s var(--ease-soft),
+    border-color .6s ease,
+    box-shadow .7s var(--ease-soft);
+}
+@media (hover: hover) {
+  .review:hover {
+    scale: 1.025;
+    border-color: rgba(247, 241, 232, .3);
+    box-shadow: 0 28px 56px -28px rgba(0, 0, 0, .75);
+  }
+}
+
+.review__head { display: flex; align-items: center; gap: .85rem; }
+.review__avatar {
+  display: grid; place-items: center; flex: none;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: var(--avatar, var(--burgundy));
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  font-weight: var(--serif-weight);
+  line-height: 1;
+}
+.review__who { flex: 1; min-width: 0; }
+.review__name {
+  overflow: hidden;
+  color: var(--on-dark);
+  font-family: var(--serif);
+  font-weight: var(--serif-weight);
+  font-size: 1.125rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.review__stars { display: block; margin-top: .3rem; color: var(--rating); }
+.review__stars svg { display: block; width: 66px; height: 13px; }
+.review__head .g-icon { align-self: flex-start; width: 20px; height: 20px; }
+
+.review__text {
+  margin: 0;
+  color: rgba(247, 241, 232, .82);
+  font-size: 1rem;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  overflow: hidden;
+}
+.review__more {
+  display: inline-flex; align-items: center; gap: .4rem;
+  align-self: flex-start;
+  margin-top: auto;
+  min-height: 44px;
+  color: #D7A3AB;
+  font-size: .9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color .3s;
+}
+.review__more::after { content: '→'; transition: translate .4s var(--ease-out); }
+.review__more:hover { color: var(--on-dark); }
+.review__more:hover::after { translate: 3px 0; }
+
+/* Narrower screens: still one row, swiped sideways with momentum. */
+@media (max-width: 1279px) {
+  .reviews__list {
+    display: flex;
+    gap: .875rem;
+    margin-inline: calc(-1 * var(--gutter));
+    padding: .5rem var(--gutter) 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .reviews__list::-webkit-scrollbar { display: none; }
+  .review { flex: 0 0 min(19.75rem, 82vw); scroll-snap-align: start; }
+}
 
 /* ---------- Instagram ---------- */
 
