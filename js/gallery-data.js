@@ -46,6 +46,15 @@ window.AURIQUE_GALLERY = [
     "h": 1600
   },
   {
+    "id": "builder-gel__dark-cherry-almond",
+    "service": "builder-gel",
+    "cat": "manicure",
+    "src": "assets/img/gallery/manicure/builder-gel__dark-cherry-almond-1086.webp",
+    "srcset": "assets/img/gallery/manicure/builder-gel__dark-cherry-almond-600.webp 600w, assets/img/gallery/manicure/builder-gel__dark-cherry-almond-1086.webp 1086w",
+    "w": 1086,
+    "h": 1448
+  },
+  {
     "id": "builder-gel__french-floral-accent",
     "service": "builder-gel",
     "cat": "manicure",
@@ -53,6 +62,24 @@ window.AURIQUE_GALLERY = [
     "srcset": "assets/img/gallery/manicure/builder-gel__french-floral-accent-600.webp 600w, assets/img/gallery/manicure/builder-gel__french-floral-accent-900.webp 900w",
     "w": 900,
     "h": 1600
+  },
+  {
+    "id": "builder-gel__hot-pink-short",
+    "service": "builder-gel",
+    "cat": "manicure",
+    "src": "assets/img/gallery/manicure/builder-gel__hot-pink-short-941.webp",
+    "srcset": "assets/img/gallery/manicure/builder-gel__hot-pink-short-600.webp 600w, assets/img/gallery/manicure/builder-gel__hot-pink-short-941.webp 941w",
+    "w": 941,
+    "h": 1672
+  },
+  {
+    "id": "builder-gel__nude-almond-rings",
+    "service": "builder-gel",
+    "cat": "manicure",
+    "src": "assets/img/gallery/manicure/builder-gel__nude-almond-rings-1086.webp",
+    "srcset": "assets/img/gallery/manicure/builder-gel__nude-almond-rings-600.webp 600w, assets/img/gallery/manicure/builder-gel__nude-almond-rings-1086.webp 1086w",
+    "w": 1086,
+    "h": 1448
   },
   {
     "id": "builder-gel__red-polka-dots",
@@ -71,6 +98,15 @@ window.AURIQUE_GALLERY = [
     "srcset": "assets/img/gallery/manicure/builder-gel__violet-chrome-tips-600.webp 600w, assets/img/gallery/manicure/builder-gel__violet-chrome-tips-900.webp 900w",
     "w": 900,
     "h": 1600
+  },
+  {
+    "id": "gel-pedicure__cobalt-blue",
+    "service": "gel-pedicure",
+    "cat": "pedicure",
+    "src": "assets/img/gallery/pedicure/gel-pedicure__cobalt-blue-941.webp",
+    "srcset": "assets/img/gallery/pedicure/gel-pedicure__cobalt-blue-600.webp 600w, assets/img/gallery/pedicure/gel-pedicure__cobalt-blue-941.webp 941w",
+    "w": 941,
+    "h": 1672
   },
   {
     "id": "gel-pedicure__pearl-white",

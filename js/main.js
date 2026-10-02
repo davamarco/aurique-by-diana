@@ -404,33 +404,58 @@
       data.forEach((item, i) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = i === 0 ? 'shot shot--feature' : 'shot';
+        btn.className = 'shot';
         btn.dataset.cat = item.cat;
         btn.dataset.anim = '';
-        btn.style.setProperty('--d', `${(i % 4) * 80}ms`);
-        btn.append(makeImg(item, i === 0
-          ? '(max-width: 640px) 78vw, (max-width: 1100px) 66vw, 50vw'
-          : '(max-width: 640px) 78vw, (max-width: 1100px) 33vw, 25vw'));
+        btn.style.setProperty('--d', `${(i % 6) * 70}ms`);
+        btn.append(makeImg(item, '(max-width: 640px) 78vw, (max-width: 1100px) 25vw, 16vw'));
+        // The lightbox walks through everything in the current filter, shown or not.
         btn.addEventListener('click', () => {
-          const visible = shots.filter((s) => !s.btn.hidden);
-          openLightbox(visible.map((s) => s.item), visible.findIndex((s) => s.btn === btn));
+          const all = shots.filter((s) => matches(s));
+          openLightbox(all.map((s) => s.item), all.findIndex((s) => s.btn === btn));
         });
         grid.append(btn);
         shots.push({ btn, item });
       });
+      // Two rows until "Show all work"; the swipe row on phones always holds everything.
+      const moreBtn = $('[data-gallery-more]');
+      const swipe = window.matchMedia('(max-width: 640px)');
+      let filter = 'all';
+      let expanded = false;
+      function matches(s) { return filter === 'all' || s.btn.dataset.cat === filter; }
+      const columns = () => getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length || 6;
+      const applyView = () => {
+        const cap = expanded || swipe.matches ? Infinity : columns() * 2;
+        let shown = 0;
+        shots.forEach((s) => {
+          const on = matches(s) && shown < cap;
+          if (on) shown += 1;
+          s.btn.hidden = !on;
+        });
+        if (moreBtn) moreBtn.hidden = shots.filter(matches).length <= cap;
+        window.ScrollTrigger?.refresh();
+      };
+      moreBtn?.addEventListener('click', () => {
+        expanded = true;
+        shots.forEach((s) => s.btn.classList.add('is-in'));
+        applyView();
+      });
+      let resizeRaf;
+      window.addEventListener('resize', () => {
+        cancelAnimationFrame(resizeRaf);
+        resizeRaf = requestAnimationFrame(applyView);
+      });
+      applyView();
       observeReveal(grid);
 
       $$('[data-filter]').forEach((f) => {
         f.addEventListener('click', () => {
           $$('[data-filter]').forEach((b) => b.setAttribute('aria-pressed', String(b === f)));
-          shots.forEach(({ btn }) => {
-            btn.hidden = !(f.dataset.filter === 'all' || btn.dataset.cat === f.dataset.filter);
-            btn.classList.add('is-in');
-          });
-          // The large first tile only makes sense in the full, unfiltered grid.
-          shots[0].btn.classList.toggle('shot--feature', f.dataset.filter === 'all');
+          filter = f.dataset.filter;
+          expanded = false;
+          shots.forEach(({ btn }) => btn.classList.add('is-in'));
+          applyView();
           grid.scrollTo?.({ left: 0 });
-          window.ScrollTrigger?.refresh();
         });
       });
     } else {

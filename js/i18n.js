@@ -63,6 +63,7 @@ window.AURIQUE_I18N = {
     'work.title': 'Trabajos <em>recientes</em>',
     'work.filterLabel': 'Filtrar por servicio',
     'work.all': 'Todo',
+    'work.more': 'Ver todos los trabajos',
     'work.view': 'Ver',
     'work.prev': 'Foto anterior',
     'work.next': 'Foto siguiente',

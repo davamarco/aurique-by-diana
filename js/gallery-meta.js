@@ -1,14 +1,18 @@
 // Hand-written companion to gallery-data.js (which is generated).
-// order:   how photos appear under "All" — the first one is shown large.
+// order:   how photos appear under "All" (the first two rows show before "Show all work").
 // covers:  which photo stands for each service row in the price list.
 // alt:     descriptions for screen readers and search, in both languages.
 window.AURIQUE_GALLERY_META = {
   order: [
     'builder-gel__burgundy-almond',
+    'builder-gel__hot-pink-short',
     'extensions__long-french',
+    'gel-pedicure__cobalt-blue',
     'builder-gel-long__green-cat-eye',
-    'gel-pedicure__pearl-white',
+    'builder-gel__nude-almond-rings',
     'extensions__dotted-outline',
+    'gel-pedicure__pearl-white',
+    'builder-gel__dark-cherry-almond',
     'builder-gel__red-polka-dots',
     'builder-gel-long__aqua-aura',
     'extensions__silver-chrome-swirls',
@@ -27,6 +31,22 @@ window.AURIQUE_GALLERY_META = {
   },
 
   alt: {
+    'builder-gel__nude-almond-rings': {
+      en: 'Builder gel manicure: glossy nude almonds',
+      es: 'Manicura con builder gel: almendradas en nude brillante'
+    },
+    'builder-gel__dark-cherry-almond': {
+      en: 'Builder gel manicure: dark cherry almonds',
+      es: 'Manicura con builder gel: almendradas en cereza oscuro'
+    },
+    'builder-gel__hot-pink-short': {
+      en: 'Builder gel manicure: short nails in hot pink',
+      es: 'Manicura con builder gel: uñas cortas en rosa intenso'
+    },
+    'gel-pedicure__cobalt-blue': {
+      en: 'Gel pedicure: glossy cobalt blue',
+      es: 'Pedicura en gel: azul cobalto brillante'
+    },
     'builder-gel__burgundy-almond': {
       en: 'Builder gel manicure: glossy burgundy almond nails',
       es: 'Manicura con builder gel: uñas almendradas en burdeos brillante'
