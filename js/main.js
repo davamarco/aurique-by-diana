@@ -667,6 +667,15 @@
       if (reduced()) map.jumpTo(target);
       else map.flyTo({ ...target, duration: 3400, curve: 1.3, essential: true });
     };
+    // Building the map blocks the page for a moment, so do it while the page is at rest
+    // (or once the map is on screen anyway), never in the middle of a scroll.
+    const scrollIdle = () => new Promise((resolve) => {
+      let timer;
+      const done = () => { window.removeEventListener('scroll', onScroll); resolve(); };
+      const onScroll = () => { clearTimeout(timer); timer = setTimeout(done, visible ? 0 : 250); };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    });
     // Rewind out of view, so the fly-in plays again every time the map scrolls back in.
     const rewind = () => {
       if (!map || !flown || touched || reduced()) return;
@@ -679,7 +688,9 @@
       if (!entry.isIntersecting) return;
       loadObs.disconnect();
       try {
+        await scrollIdle();
         const maplibregl = await loadMapLib();
+        await scrollIdle();
         const es = lang === 'es';
         map = new maplibregl.Map({
           container: el,
@@ -710,7 +721,7 @@
       } catch (e) {
         el.closest('.visit__map').hidden = true;
       }
-    }, { rootMargin: '600px 0px' });
+    }, { rootMargin: '1600px 0px' });
     loadObs.observe(el);
 
     new IntersectionObserver(([entry]) => {

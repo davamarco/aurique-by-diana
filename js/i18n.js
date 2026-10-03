@@ -21,7 +21,8 @@ window.AURIQUE_I18N = {
     'cta.book': 'Reserva tu cita',
 
     'hero.title': 'El arte de una manicura <em>impecable</em>.',
-    'hero.lede': 'Manicura rusa en seco, builder gel y extensiones de gel por Diana, en un estudio en SW 2nd Ave, Brickell.',
+    'hero.lede': 'Manicura rusa en seco, builder gel, extensiones de uñas (set completo), pedicura en seco y pedicura en gel, por&nbsp;Diana.',
+    'hero.visit': 'Visita mi estudio en',
     'hero.seeServices': 'Ver servicios y precios',
     'hero.alt': 'Diana en su mesa de manicura en el estudio Aurique, con una fresa y una lima en las manos',
 
