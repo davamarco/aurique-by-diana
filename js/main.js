@@ -748,9 +748,49 @@
 
     const apple = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
     if (apple) {
-      const q = encodeURIComponent(cfg.address || '33 SW 2nd Ave, Unit 604, Miami, FL 33130');
+      const q = encodeURIComponent(cfg.address || '33 SW 2nd Ave, Suite 604, Miami, FL 33130');
       $$('[data-directions]').forEach((a) => { a.href = `https://maps.apple.com/?daddr=${q}`; });
     }
+  }
+
+  /* ---------------- Route video: hover preview, opens large ---------------- */
+
+  // The video only loads once someone hovers or taps it, never with the page.
+  function initRoute() {
+    const btn = $('[data-route]');
+    const dlg = $('[data-vbox]');
+    const video = $('[data-vbox-video]');
+    if (!btn || !dlg || !video) return;
+    const src = btn.dataset.route;
+    const preview = $('[data-route-preview]', btn);
+
+    if (finePointer && preview) {
+      btn.addEventListener('pointerenter', () => {
+        if (reduced()) return;
+        if (!preview.src) preview.src = src;
+        preview.play().then(() => btn.classList.add('is-previewing')).catch(() => {});
+      });
+      btn.addEventListener('pointerleave', () => {
+        preview.pause();
+        btn.classList.remove('is-previewing');
+      });
+    }
+
+    btn.addEventListener('click', () => {
+      preview?.pause();
+      btn.classList.remove('is-previewing');
+      if (!video.src) video.src = src;
+      video.currentTime = 0;
+      dlg.showModal();
+      lenis?.stop();
+      video.play().catch(() => {});
+    });
+    $('[data-vbox-close]', dlg)?.addEventListener('click', () => dlg.close());
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener('close', () => {
+      video.pause();
+      lenis?.start();
+    });
   }
 
   /* ---------------- Studio hours: highlight today (Miami time) ---------------- */
@@ -903,6 +943,7 @@
   initInstagram();
   initMap();
   initVisit();
+  initRoute();
   markToday();
   document.addEventListener('aurique:lang', markToday);
   initFaq();
