@@ -4,7 +4,7 @@
 window.AURIQUE_I18N = {
   es: {
     'meta.title': 'Aurique by Diana — Manicura rusa en Brickell, Miami',
-    'meta.description': 'Manicura rusa en seco, builder gel y extensiones de gel por Diana en 33 SW 2nd Ave, Brickell, Miami. Abierto de martes a domingo, de 10 a. m. a 7 p. m. Reserva en línea.',
+    'meta.description': 'Manicura rusa en seco, builder gel y extensiones de gel por Diana en 33 SW 2nd Ave, Brickell, Miami. Abierto de martes a domingo, de 10 a. m. a 7 p. m. 20 % de descuento en tu primera visita: reserva en línea.',
     'a11y.skip': 'Ir al contenido',
 
     'nav.label': 'Principal',
@@ -22,6 +22,14 @@ window.AURIQUE_I18N = {
 
     'hero.title': 'El arte de una manicura <em>impecable</em>.',
     'hero.lede': 'Manicura rusa en seco, builder gel, extensiones de uñas (set completo), pedicura en seco y pedicura en gel, por&nbsp;Diana.',
+    'offer.topbar': 'Primera visita · 20 % de descuento',
+    'offer.bar': 'Primera visita · −20 %',
+    'offer.kicker': 'Primera visita',
+    'offer.line': 'de descuento en todo',
+    'offer.cta': 'Reservar',
+    'offer.label': 'Reserva tu primera visita: 20 % de descuento en cualquier servicio',
+    'offer.note': '<strong>Primera visita: 20 % de descuento</strong> en cualquier servicio.',
+    'offer.services': '<strong>Primera visita: 20 % de descuento</strong> en cualquier servicio. Diana lo aplica en tu cita.',
     'hero.visit': 'Visita mi estudio en',
     'hero.seeServices': 'Ver servicios y precios',
     'hero.alt': 'Diana en su mesa de manicura en el estudio Aurique, con una fresa y una lima en las manos',
@@ -128,6 +136,8 @@ window.AURIQUE_I18N = {
     'faq.a3': 'Depende del servicio y del diseño. Los tiempos estimados aparecen en el menú de reservas.',
     'faq.q4': '¿Dónde está el estudio y hay estacionamiento?',
     'faq.a4': 'El estudio está en 33 SW 2nd Ave, Miami, en el piso 6, Suite 604. El edificio no tiene estacionamiento propio, pero hay estacionamiento en la calle y parqueos públicos cerca. Calcula un poco más de tiempo para estacionar.',
+    'faq.q5': '¿Tienen descuento en la primera visita?',
+    'faq.a5': 'Sí: 20 % de descuento en cualquier servicio en tu primera visita. Reserva en línea como siempre y aplicaré el descuento en tu cita.',
     'footer.contact': 'Contacto'
   },
 

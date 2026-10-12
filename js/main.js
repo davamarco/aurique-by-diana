@@ -929,6 +929,30 @@
     }).observe(hero);
   }
 
+  /* ---------------- Mobile: first-visit offer bar ---------------- */
+
+  // Slides up once the hero's offer card has scrolled away; steps aside at the footer,
+  // which has its own Book button. Hidden above phone width by CSS.
+  function initOfferBar() {
+    const bar = $('[data-offer-bar]');
+    const card = $('.hero .offer');
+    const footer = $('.site-footer');
+    if (!bar || !card || !('IntersectionObserver' in window)) { bar?.classList.add('is-visible'); return; }
+    let past = false;
+    let atFooter = false;
+    const update = () => bar.classList.toggle('is-visible', past && !atFooter);
+    new IntersectionObserver(([entry]) => {
+      past = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+      update();
+    }).observe(card);
+    if (footer) {
+      new IntersectionObserver(([entry]) => {
+        atFooter = entry.isIntersecting;
+        update();
+      }).observe(footer);
+    }
+  }
+
   /* ---------------- Boot ---------------- */
 
 
@@ -960,6 +984,7 @@
   initFaq();
   initForm();
   initWhatsAppFloat();
+  initOfferBar();
 
   // Split words shift slightly when the web fonts arrive, so wait for them (briefly).
   const fontsReady = document.fonts ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 900))]) : Promise.resolve();
