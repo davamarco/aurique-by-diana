@@ -963,7 +963,43 @@
     $$('.tbd').forEach((el) => el.remove());
   }
 
-  $$('[data-book]').forEach((a) => { if (cfg.squareUrl) a.href = cfg.squareUrl; });
+  /* ---------------- Google Ads: gclid + click tracking ---------------- */
+  const GCLID_KEY = 'aurique_gclid';
+  (function saveGclid() {
+    const p = new URLSearchParams(location.search);
+    const id = p.get('gclid') || p.get('gbraid') || p.get('wbraid');
+    if (id) {
+      try { localStorage.setItem(GCLID_KEY, JSON.stringify({ id, exp: Date.now() + 90 * 864e5 })); } catch (_) {}
+    }
+  })();
+  function getGclid() {
+    try {
+      const v = JSON.parse(localStorage.getItem(GCLID_KEY) || 'null');
+      if (v && v.exp > Date.now()) return v.id;
+    } catch (_) {}
+    return null;
+  }
+
+  $$('[data-book]').forEach((a) => {
+    if (!cfg.squareUrl) return;
+    const url = new URL(cfg.squareUrl);
+    const gclid = getGclid();
+    if (gclid) url.searchParams.set('gclid', gclid);
+    a.href = url.toString();
+  });
+
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('a[href]');
+    if (!a || typeof window.gtag !== 'function') return;
+    const href = a.href || '';
+    if (a.hasAttribute('data-book') || /^https:\/\/book\.squareup\.com\//.test(href)) {
+      gtag('event', 'conversion', { send_to: 'AW-18337766069/e8XpCP7TtqEdELW1kKhE' });
+    } else if (href.startsWith('tel:')) {
+      gtag('event', 'click_call', { link_url: href });
+    } else if (/^https:\/\/wa\.me\//.test(href)) {
+      gtag('event', 'click_whatsapp', { link_url: href });
+    }
+  }, { capture: true });
   $$('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
 
   applyLang(readInitialLang());
