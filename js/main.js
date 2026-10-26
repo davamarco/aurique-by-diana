@@ -990,14 +990,19 @@
 
   document.addEventListener('click', (e) => {
     const a = e.target.closest && e.target.closest('a[href]');
-    if (!a || typeof window.gtag !== 'function') return;
+    if (!a) return;
+    const hasGtag = typeof window.gtag === 'function';
     const href = a.href || '';
     if (a.hasAttribute('data-book') || /^https:\/\/book\.squareup\.com\//.test(href)) {
-      gtag('event', 'conversion', { send_to: 'AW-18337766069/e8XpCP7TtqEdELW1kKhE' });
+      if (hasGtag) gtag('event', 'conversion', { send_to: 'AW-18337766069/e8XpCP7TtqEdELW1kKhE' });
+      // Meta Pixel: booking intent (Square does not allow a pixel on its pages)
+      if (typeof window.fbq === 'function') fbq('track', 'Lead', { content_name: 'Square booking click' });
+      // Microsoft Clarity: custom event for filtering recordings
+      if (typeof window.clarity === 'function') clarity('event', 'book_click');
     } else if (href.startsWith('tel:')) {
-      gtag('event', 'click_call', { link_url: href });
+      if (hasGtag) gtag('event', 'click_call', { link_url: href });
     } else if (/^https:\/\/wa\.me\//.test(href)) {
-      gtag('event', 'click_whatsapp', { link_url: href });
+      if (hasGtag) gtag('event', 'click_whatsapp', { link_url: href });
     }
   }, { capture: true });
   $$('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
