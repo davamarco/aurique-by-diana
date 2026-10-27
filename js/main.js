@@ -964,21 +964,31 @@
   }
 
   /* ---------------- Google Ads: gclid + click tracking ---------------- */
-  const GCLID_KEY = 'aurique_gclid';
-  (function saveGclid() {
+  // The latest ad click's ids, kept for 90 days: { gclid, gbraid, wbraid, ts, exp }.
+  const CLICK_KEY = 'aurique_click_ids';
+  const CLICK_PARAMS = ['gclid', 'gbraid', 'wbraid'];
+  (function saveClickIds() {
     const p = new URLSearchParams(location.search);
-    const id = p.get('gclid') || p.get('gbraid') || p.get('wbraid');
-    if (id) {
-      try { localStorage.setItem(GCLID_KEY, JSON.stringify({ id, exp: Date.now() + 90 * 864e5 })); } catch (_) {}
-    }
-  })();
-  function getGclid() {
+    const ids = {};
+    CLICK_PARAMS.forEach((k) => { if (p.get(k)) ids[k] = p.get(k); });
     try {
-      const v = JSON.parse(localStorage.getItem(GCLID_KEY) || 'null');
-      if (v && v.exp > Date.now()) return v.id;
+      if (Object.keys(ids).length) {
+        localStorage.setItem(CLICK_KEY, JSON.stringify({ ...ids, ts: new Date().toISOString(), exp: Date.now() + 90 * 864e5 }));
+      } else if (!localStorage.getItem(CLICK_KEY)) {
+        // Older visits stored a single id under 'aurique_gclid'.
+        const old = JSON.parse(localStorage.getItem('aurique_gclid') || 'null');
+        if (old && old.exp > Date.now()) localStorage.setItem(CLICK_KEY, JSON.stringify({ gclid: old.id, exp: old.exp }));
+      }
+    } catch (_) {}
+  })();
+  function getClickIds() {
+    try {
+      const v = JSON.parse(localStorage.getItem(CLICK_KEY) || 'null');
+      if (v && v.exp > Date.now() && CLICK_PARAMS.some((k) => v[k])) return v;
     } catch (_) {}
     return null;
   }
+  const getGclid = () => getClickIds()?.gclid || null;
 
   $$('[data-book]').forEach((a) => {
     if (!cfg.squareUrl) return;
@@ -1005,6 +1015,97 @@
       if (hasGtag) gtag('event', 'click_whatsapp', { link_url: href });
     }
   }, { capture: true });
+
+  /* ---------------- Booking gate: phone + ad click ids → Zapier ---------------- */
+  // Square drops query parameters, so the gclid never reaches the booking.
+  // Ad visitors leave a phone first; Zapier pairs it with the Square customer.
+  (function initGate() {
+    const dlg = $('[data-gate]');
+    const form = $('[data-gate-form]');
+    const input = $('[data-gate-phone]');
+    const error = $('[data-gate-error]');
+    if (!dlg || !form || !input || !cfg.zapierHook) return;
+    const DONE_KEY = 'aurique_gate_done';
+    let pending = null;
+    let skipped = false;
+
+    const doneFor = (ids) => {
+      try { return localStorage.getItem(DONE_KEY) === (ids.gclid || ids.gbraid || ids.wbraid); } catch (_) { return false; }
+    };
+    const markDone = (ids) => {
+      try { localStorage.setItem(DONE_KEY, ids.gclid || ids.gbraid || ids.wbraid); } catch (_) {}
+    };
+    const toE164 = (raw) => {
+      const d = raw.replace(/\D/g, '');
+      if (d.length === 10) return '+1' + d;
+      if (d.length === 11 && d[0] === '1') return '+' + d;
+      if (raw.trim().startsWith('+') && d.length >= 8 && d.length <= 15) return '+' + d;
+      return null;
+    };
+    const goToSquare = () => {
+      const href = pending;
+      pending = null;
+      dlg.close();
+      if (!href) return;
+      // 'noopener' would make window.open return null, so drop the opener by hand.
+      const w = window.open(href, '_blank');
+      if (w) w.opener = null;
+      else location.href = href;
+    };
+
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('a[data-book]');
+      if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+      const ids = getClickIds();
+      if (!ids || skipped || doneFor(ids)) return;
+      e.preventDefault();
+      pending = a.href;
+      error.textContent = '';
+      input.removeAttribute('aria-invalid');
+      dlg.showModal();
+      lenis?.stop();
+      if (finePointer) input.focus();
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const ids = getClickIds() || {};
+      const phone = toE164(input.value);
+      if (!phone) {
+        error.textContent = t('gatePhone');
+        input.setAttribute('aria-invalid', 'true');
+        input.focus();
+        return;
+      }
+      const body = new URLSearchParams({
+        phone,
+        phone_raw: input.value.trim(),
+        gclid: ids.gclid || '',
+        gbraid: ids.gbraid || '',
+        wbraid: ids.wbraid || '',
+        click_time: ids.ts || '',
+        submitted_at: new Date().toISOString(),
+        lang: document.documentElement.lang,
+        page: location.href
+      });
+      // sendBeacon survives the tab switch to Square; fetch is the fallback.
+      if (!(navigator.sendBeacon && navigator.sendBeacon(cfg.zapierHook, body))) {
+        fetch(cfg.zapierHook, { method: 'POST', body, mode: 'no-cors', keepalive: true }).catch(() => {});
+      }
+      if (typeof window.clarity === 'function') clarity('event', 'gate_phone');
+      markDone(ids);
+      goToSquare();
+    });
+
+    $('[data-gate-skip]', dlg)?.addEventListener('click', () => {
+      if (typeof window.clarity === 'function') clarity('event', 'gate_skip');
+      skipped = true;
+      goToSquare();
+    });
+    $('[data-gate-close]', dlg)?.addEventListener('click', () => { pending = null; dlg.close(); });
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) { pending = null; dlg.close(); } });
+    dlg.addEventListener('close', () => lenis?.start());
+  })();
   $$('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
 
   applyLang(readInitialLang());

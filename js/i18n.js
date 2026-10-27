@@ -138,7 +138,15 @@ window.AURIQUE_I18N = {
     'faq.a4': 'El estudio está en 33 SW 2nd Ave, Miami, en el piso 6, Suite 604. El edificio no tiene estacionamiento propio, pero hay estacionamiento en la calle y parqueos públicos cerca. Calcula un poco más de tiempo para estacionar.',
     'faq.q5': '¿Tienen descuento en la primera visita?',
     'faq.a5': 'Sí: 20 % de descuento en cualquier servicio en tu primera visita. Reserva en línea como siempre y aplicaré el descuento en tu cita.',
-    'footer.contact': 'Contacto'
+    'footer.contact': 'Contacto',
+
+    'gate.kicker': 'Primera visita · 20 % de descuento',
+    'gate.title': 'Un paso antes de <em>reservar</em>',
+    'gate.lede': 'Deja tu número de teléfono para que Diana pueda identificar tu cita. Usa el mismo número cuando reserves en Square.',
+    'gate.phone': 'Número de teléfono',
+    'gate.go': 'Continuar con la reserva',
+    'gate.skip': 'Omitir y reservar',
+    'gate.note': 'Square se abre en una pestaña nueva.'
   },
 
   dynamic: {
@@ -153,7 +161,8 @@ window.AURIQUE_I18N = {
       required: 'Add your name and a phone number so Diana can reply.',
       mailto: 'Your email app opened with the request ready to send.',
       mailSubject: 'Appointment request',
-      pin: 'Aurique'
+      pin: 'Aurique',
+      gatePhone: 'Enter a phone number with area code, e.g. (305) 555-0123.'
     },
     es: {
       less: 'Ver menos',
@@ -166,7 +175,8 @@ window.AURIQUE_I18N = {
       required: 'Escribe tu nombre y un teléfono para que Diana pueda responderte.',
       mailto: 'Se abrió tu app de correo con la solicitud lista para enviar.',
       mailSubject: 'Solicitud de cita',
-      pin: 'Aurique'
+      pin: 'Aurique',
+      gatePhone: 'Escribe un número con código de área, por ejemplo (305) 555-0123.'
     }
   }
 };

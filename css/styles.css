@@ -1824,3 +1824,60 @@ body::before {
     transparent 100%);
   pointer-events: none;
 }
+
+/* ---------------- Booking gate (ad visitors) ---------------- */
+.gate {
+  width: 100vw; height: 100dvh;
+  max-width: none; max-height: none;
+  margin: 0; padding: 1rem;
+  border: 0;
+  background: rgba(36, 28, 26, .72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.gate[open] { display: grid; place-items: center; animation: vbox-fade .3s var(--ease-out); }
+.gate::backdrop { background: transparent; }
+.gate__card {
+  position: relative;
+  display: grid; gap: 1rem;
+  width: min(100%, 460px);
+  padding: clamp(1.75rem, 4vw, 2.5rem);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--espresso);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .55);
+  animation: vbox-rise .5s var(--ease-out);
+}
+.gate__close {
+  position: absolute; top: .75rem; right: .75rem;
+  width: 44px; height: 44px;
+  border: 0; border-radius: 50%;
+  background: none; color: var(--muted);
+  font-size: 1.5rem; line-height: 1; cursor: pointer;
+}
+.gate__close:hover { color: var(--burgundy); }
+.gate__kicker {
+  font-size: .8125rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+  padding-right: 2.5rem;
+  color: var(--burgundy);
+}
+.gate__title {
+  font-family: var(--serif); font-weight: var(--serif-weight);
+  font-size: var(--fs-h3); line-height: 1.1;
+}
+.gate__title:focus { outline: none; }
+.gate__title em { color: var(--burgundy); }
+.gate__lede { color: var(--muted); font-size: var(--fs-small); }
+.gate__error { min-height: 1.2em; margin-top: -.5rem; color: var(--burgundy); font-size: .9375rem; }
+.gate__error:empty { min-height: 0; margin: 0; }
+.gate__go { justify-content: center; width: 100%; }
+.gate__skip {
+  justify-self: center;
+  min-height: 44px; padding: .5rem 1rem;
+  border: 0; background: none;
+  color: var(--muted); font-size: .9375rem;
+  text-decoration: underline; text-underline-offset: .2em;
+  cursor: pointer;
+}
+.gate__skip:hover { color: var(--burgundy); }
+.gate__note { margin-top: -.5rem; text-align: center; color: var(--muted); font-size: .8125rem; }

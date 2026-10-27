@@ -697,6 +697,23 @@
     </div>
   </dialog>
 
+  <dialog class="gate" data-gate aria-labelledby="gate-title">
+    <form class="gate__card" method="dialog" data-gate-form novalidate>
+      <button class="gate__close" type="button" data-gate-close aria-label="Close" data-i18n-attr="aria-label:nav.close">×</button>
+      <p class="gate__kicker" data-i18n="gate.kicker">First visit · 20% off</p>
+      <h2 class="gate__title" id="gate-title" tabindex="-1" autofocus data-i18n="gate.title">One step before <em>booking</em></h2>
+      <p class="gate__lede" data-i18n="gate.lede">Leave your phone number so Diana can match your appointment. Please use the same number when you book on Square.</p>
+      <div class="field">
+        <label for="gate-phone" data-i18n="gate.phone">Phone number</label>
+        <input id="gate-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(305) 555-0123" required data-gate-phone>
+      </div>
+      <p class="gate__error" role="alert" data-gate-error></p>
+      <button class="btn btn--book gate__go" type="submit"><span data-i18n="gate.go">Continue to booking</span></button>
+      <button class="gate__skip" type="button" data-gate-skip data-i18n="gate.skip">Skip and book</button>
+      <p class="gate__note" data-i18n="gate.note">Square opens in a new tab.</p>
+    </form>
+  </dialog>
+
   <script src="js/config.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/gallery-data.js"></script>

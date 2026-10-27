@@ -14,6 +14,12 @@ window.AURIQUE = {
   // While empty, the Instagram section shows only the profile link.
   beholdFeedId: '',
 
+  // Zapier "Catch Hook" URL. Visitors who came from a Google ad are asked for
+  // their phone before Square opens; phone + gclid/gbraid/wbraid go here so the
+  // Square booking can be matched to the ad click. While empty, Book opens
+  // Square directly.
+  zapierHook: '',
+
   // 33 SW 2nd Ave, Miami, FL 33130 — [lng, lat]
   coords: [-80.1975246, 25.7734397],
   address: '33 SW 2nd Ave, Suite 604, Miami, FL 33130'
