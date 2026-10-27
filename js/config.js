@@ -14,10 +14,13 @@ window.AURIQUE = {
   // While empty, the Instagram section shows only the profile link.
   beholdFeedId: '',
 
-  // Zapier "Catch Hook" URL. Visitors who came from a Google ad are asked for
-  // their phone before Square opens; phone + gclid/gbraid/wbraid go here so the
-  // Square booking can be matched to the ad click. While empty, Book opens
-  // Square directly.
+  // Visitors who came from a Google ad are asked for their phone before Square
+  // opens; phone + gclid/gbraid/wbraid go to the worker in square-worker/, which
+  // writes the click id into the Square customer attribute "gclid".
+  // While empty, Book opens Square directly.
+  gclidEndpoint: '',
+
+  // Optional copy of the same data to a Zapier "Catch Hook", for logs only.
   zapierHook: '',
 
   // 33 SW 2nd Ave, Miami, FL 33130 — [lng, lat]

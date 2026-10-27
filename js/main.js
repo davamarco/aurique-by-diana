@@ -1016,15 +1016,16 @@
     }
   }, { capture: true });
 
-  /* ---------------- Booking gate: phone + ad click ids → Zapier ---------------- */
+  /* ---------------- Booking gate: phone + ad click ids → Square attribute ---------------- */
   // Square drops query parameters, so the gclid never reaches the booking.
-  // Ad visitors leave a phone first; Zapier pairs it with the Square customer.
+  // Ad visitors leave a phone first; the worker pairs it with the Square customer.
   (function initGate() {
     const dlg = $('[data-gate]');
     const form = $('[data-gate-form]');
     const input = $('[data-gate-phone]');
     const error = $('[data-gate-error]');
-    if (!dlg || !form || !input || !cfg.zapierHook) return;
+    const targets = [cfg.gclidEndpoint, cfg.zapierHook].filter(Boolean);
+    if (!dlg || !form || !input || !targets.length) return;
     const DONE_KEY = 'aurique_gate_done';
     let pending = null;
     let skipped = false;
@@ -1089,9 +1090,11 @@
         page: location.href
       });
       // sendBeacon survives the tab switch to Square; fetch is the fallback.
-      if (!(navigator.sendBeacon && navigator.sendBeacon(cfg.zapierHook, body))) {
-        fetch(cfg.zapierHook, { method: 'POST', body, mode: 'no-cors', keepalive: true }).catch(() => {});
-      }
+      targets.forEach((url) => {
+        if (!(navigator.sendBeacon && navigator.sendBeacon(url, body))) {
+          fetch(url, { method: 'POST', body, mode: 'no-cors', keepalive: true }).catch(() => {});
+        }
+      });
       if (typeof window.clarity === 'function') clarity('event', 'gate_phone');
       markDone(ids);
       goToSquare();
